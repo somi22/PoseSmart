@@ -72,7 +72,7 @@
               ><v-btn
                 :style="{ width: '15rem', height: '3rem', fontSize: '1.5rem' }"
                 color="warning"
-                @click="login(id, password)"
+                @click="login"
                 >로그인</v-btn
               ></v-col
             >
@@ -102,6 +102,7 @@
               ><v-btn
                 :style="{ width: '15rem', height: '3rem', fontSize: '1.5rem' }"
                 color="warning"
+                @click="register"
                 >회원 가입</v-btn
               ></v-col
             >
@@ -115,17 +116,44 @@
 
 <script lang="ts">
 import Vue from "vue";
-
+import { registerUser, loginUser } from "@/api/user";
 export default Vue.extend({
   name: "HomePage",
   methods: {
+    // async register(): Promise<void> {
+    //   console.log({
+    //     username: this.registerId,
+    //     password: this.registerPassword,
+    //   });
+    //   console.log("register");
+    //   try {
+    //     await registerUser({
+    //       username: this.registerId,
+    //       password: this.registerPassword,
+    //     });
+    //     console.log("가입성공");
+    //   } catch (error) {
+    //     console.log(error);
+    //     alert("로그인 불가");
+    //   }
+    // },
     setMode(val: string): void {
       this.mode = val;
     },
-    login(id: string, password: string): void {
-      console.log(id, password);
-      this.$router.push({ name: "LoginHome" });
-    },
+    // async login(): Promise<void> {
+    //   console.log({ username: this.id, password: this.password });
+    //   try {
+    //     const data = await loginUser({
+    //       username: this.id,
+    //       password: this.password,
+    //     });
+    //     console.log(data);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+
+    //   // this.$router.push({ name: "LoginHome" });
+    // },
   },
   data() {
     return {
