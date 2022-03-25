@@ -116,7 +116,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { registerUser, loginUser } from "@/api/user";
+import { registerUser, loginUser, getTime, getReports } from "@/api/user";
 export default Vue.extend({
   name: "HomePage",
   methods: {
@@ -140,20 +140,20 @@ export default Vue.extend({
     setMode(val: string): void {
       this.mode = val;
     },
-    // async login(): Promise<void> {
-    //   console.log({ username: this.id, password: this.password });
-    //   try {
-    //     const data = await loginUser({
-    //       username: this.id,
-    //       password: this.password,
-    //     });
-    //     console.log(data);
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-
-    //   // this.$router.push({ name: "LoginHome" });
-    // },
+    async login(): Promise<void> {
+      console.log({ username: this.id, password: this.password });
+      try {
+        const data = await loginUser({
+          username: this.id,
+          password: this.password,
+        });
+        sessionStorage.setItem("accessToken", data.data.access);
+        this.$router.push({ name: "LoginHome" });
+      } catch (error) {
+        console.log("error");
+        console.log(error);
+      }
+    },
   },
   data() {
     return {

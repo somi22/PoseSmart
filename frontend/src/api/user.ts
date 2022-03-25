@@ -14,36 +14,36 @@ interface Time {
 }
 
 async function registerUser(user: User): Promise<void> {
-  await api.post(`/accounts`, JSON.stringify(user));
+  await api.post(`/accounts/`, JSON.stringify(user));
 }
 
 async function deleteUser(user: User): Promise<void> {
   const loginApi = loginApiInstance();
-  await loginApi.delete(`/accounts`);
+  await loginApi.delete(`/accounts/`);
 }
 
 async function loginUser(user: User): Promise<AxiosResponse<any, any>> {
-  return await api.post(`/login`, JSON.stringify(user));
+  return await api.post(`/accounts/login/`, JSON.stringify(user));
 }
 
 async function getTime(): Promise<Time> {
   const loginApi = loginApiInstance();
-  return await loginApi.get(`/time`);
+  return await loginApi.get(`/accounts/time/`);
 }
 
 async function modifyTime(time: Time): Promise<void> {
   const loginApi = loginApiInstance();
-  await loginApi.put(`/time`, JSON.stringify(time));
+  await loginApi.put(`/accounts/time/`, JSON.stringify(time));
 }
 
 async function getReports(): Promise<any> {
   const loginApi = loginApiInstance();
-  await loginApi.get(`/reports`);
+  await loginApi.get(`/reports/`);
 }
 
 async function insertReports(reports: any): Promise<any> {
   const loginApi = loginApiInstance();
-  await loginApi.post(`/reports`, JSON.stringify(reports));
+  await loginApi.post(`/reports/`, JSON.stringify(reports));
 }
 
 export {
