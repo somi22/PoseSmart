@@ -83,7 +83,12 @@ export default Vue.extend({
           blink_cnt: data.blink_cnt,
           stretching_cnt: data.stretching_cnt,
           date: data.start_time.substring(0, 10),
-          study_time: duringHour + ":" + duringMin + ":" + duringSec,
+          study_time:
+            duringHour.toFixed(0) +
+            ":" +
+            duringMin.toFixed(0) +
+            ":" +
+            duringSec.toFixed(0),
         } as never;
         this.results.push(item);
       });
