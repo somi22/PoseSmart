@@ -4,7 +4,7 @@
       class="loginImg"
       :style="{ backgroundImage: `url(${require('@/assets/main.jpg')})` }"
     >
-      <div class="logo">SmartPose</div>
+      <div class="logo">PoseSmart</div>
       <div class="content" :style="{ top: '55%', fontSize: '3rem' }">
         <div>AI 거북목 탐지 & 눈 깜빡임 감지</div>
         <div :style="{ marginTop: '130px' }">
@@ -167,7 +167,7 @@ export default Vue.extend({
     return {
       dialog: false,
       select: [
-        { state: "10초", val: 10 },
+        { state: "20초", val: 20 },
         { state: "20초", val: 20 },
       ],
       items: [
