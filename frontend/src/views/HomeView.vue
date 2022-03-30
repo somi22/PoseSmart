@@ -8,7 +8,7 @@
         <div class="content">
           <v-row class="mt-15"></v-row>
           <v-row class="mt-15"></v-row>
-          <v-row :style="{ marginLeft: '200px' }">SmartPose</v-row>
+          <v-row :style="{ marginLeft: '200px' }">PoseSmart</v-row>
           <v-row class="mt-15"></v-row>
           <v-row class="mt-15"></v-row>
           <v-row class="mt-15"></v-row>
