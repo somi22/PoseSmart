@@ -49,7 +49,7 @@ async function insertReports(reports: any): Promise<any> {
 async function getDetect(data: any) {
   const loginApi = loginApiInstance();
   const temp = data;
-  if (temp.cnt < 4) {
+  if (temp.cnt <= 4) {
     temp.face_x = data.face_x.toString();
     temp.face_y = data.face_y.toString();
     temp.nose_to_center = data.nose_to_center.toString();

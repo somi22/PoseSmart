@@ -79,9 +79,9 @@ export default Vue.extend({
         face_x_mean: 0.0,
         face_y_mean: 0.0,
         nose_mean: 0.0,
-        face_x: [],
-        face_y: [],
-        nose_to_center: [],
+        face_x: "",
+        face_y: "",
+        nose_to_center: "",
         cnt: 0,
       },
     };
@@ -155,11 +155,12 @@ export default Vue.extend({
           const reader = new FileReader();
           reader.onload = async () => {
             //data = this.blobToString(data);
-            console.log(this.data);
+            // console.log(this.data);
             try {
               //TODO
               this.data.blob_data = reader.result;
               if (this.data.cnt == 4) {
+                this.overFive_data.cnt = this.data.cnt;
                 this.nose_mean = this.data.nose_mean;
                 this.face_x_mean = this.data.face_x_mean;
                 this.face_y_mean = this.data.face_y_mean;
@@ -167,11 +168,15 @@ export default Vue.extend({
                 this.overFive_data.face_y_mean = this.face_y_mean;
                 this.overFive_data.nose_mean = this.nose_mean;
               }
-              if (this.data.cnt > 4) {
-                console.log(this.overFive_data);
+              if (this.data.cnt >= 4) {
+                this.overFive_data.blob_data = reader.result;
+                this.overFive_data.cnt = this.overFive_data.cnt + 1;
+                // console.log(this.overFive_data);
                 await getDetect(this.overFive_data);
+                return 
               }
-              console.log(this.data);
+
+              // console.log(this.data);
               this.data = (await getDetect(this.data)).data;
             } catch (error) {
               console.log(error);
