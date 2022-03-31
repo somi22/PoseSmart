@@ -5,8 +5,14 @@
       :style="{ backgroundImage: `url(${require('@/assets/transmain.png')})` }"
     >
       <div class="logo">
-        <img src="@/assets/logo_transparent.png" alt="" width="300" />
+        <img
+          @click="home"
+          src="@/assets/logo_transparent.png"
+          alt=""
+          width="300"
+        />
       </div>
+      <v-btn class="logout" @click="logout">LOGOUT</v-btn>
       <div class="content" :style="{ top: '55%', fontSize: '3rem' }">
         <div>AI 거북목 탐지 & 눈 깜빡임 감지</div>
         <div :style="{ marginTop: '130px' }">
@@ -20,6 +26,7 @@
         <v-col></v-col>
         <v-col>
           <img
+            class="rounded-xl"
             src="@/assets/detect.png"
             alt=""
             width="368"
@@ -29,6 +36,7 @@
         <v-col></v-col>
         <v-col>
           <img
+            class="rounded-xl"
             src="@/assets/result.png"
             alt=""
             width="368"
@@ -38,6 +46,7 @@
         <v-col></v-col>
         <v-col>
           <img
+            class="rounded-xl"
             src="@/assets/alarm.png"
             alt=""
             width="368"
@@ -139,6 +148,14 @@ import Vue from "vue";
 import { getTime, modifyTime } from "@/api/user";
 export default Vue.extend({
   methods: {
+    home() {
+      this.$router.push({ name: "LoginHome" });
+    },
+    logout() {
+      sessionStorage.removeItem("accessToken");
+      this.$router.push({ name: "HomeView" });
+      this.$router.go(0);
+    },
     async click(val: string): Promise<void> {
       if (val === "detect") {
         this.$router.push({ name: "DectectPose" });
@@ -219,4 +236,9 @@ export default Vue.extend({
 });
 </script>
 
-<style></style>
+<style>
+.logout {
+  left: 95%;
+  margin-top: 10px;
+}
+</style>

@@ -9,7 +9,7 @@ Vue.use(VueRouter);
 
 const onlyAuthUser = async (to: any, from: any, next: any) => {
   // console.log(store);
-  const token = sessionStorage.getItem("access-token");
+  const token = sessionStorage.getItem("accessToken");
   console.log(token);
   if (token) {
     console.log("로그인 했다.");

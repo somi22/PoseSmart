@@ -4,6 +4,15 @@
       class="mainImg"
       :style="{ backgroundImage: `url(${require('@/assets/transmain.png')})` }"
     >
+      <div class="logo">
+        <img
+          @click="home"
+          src="@/assets/logo_transparent.png"
+          alt=""
+          width="300"
+        />
+      </div>
+      <v-btn class="logout" @click="logout">LOGOUT</v-btn>
       <div class="content">
         <div>Time : {{ timeString }}</div>
         <div>
@@ -63,6 +72,14 @@ export default Vue.extend({
     };
   },
   methods: {
+    home() {
+      this.$router.push({ name: "LoginHome" });
+    },
+    logout() {
+      sessionStorage.removeItem("accessToken");
+      this.$router.push({ name: "HomeView" });
+      this.$router.go(0);
+    },
     pause() {
       if (this.time > 0) {
         clearInterval(this.timeset);
@@ -180,5 +197,14 @@ export default Vue.extend({
 }
 .content {
   top: 45%;
+}
+.logo {
+  position: absolute;
+  font-size: 3rem;
+  color: black;
+  font-weight: bold;
+  z-index: 2;
+  left: -2%;
+  top: -7.2%;
 }
 </style>
