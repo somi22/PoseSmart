@@ -137,7 +137,7 @@ export default Vue.extend({
       this.playing = true;
     },
     takePhoto() {
-      let data = "";
+      let data1 = "";
       let data2 = "";
       this.imageCapture
         .takePhoto()
@@ -149,12 +149,13 @@ export default Vue.extend({
           // console.log(myFile);
           // this.downloadFiles(blob, "test.png", "image/png");
           //this.file = new Blob([blob], { type: "image/png" });
-          data = blob;
+          data1 = blob;
         })
         .then(() => {
           const reader = new FileReader();
-          reader.onload = async function () {
+          reader.onload = async () => {
             //data = this.blobToString(data);
+            console.log(this.data);
             try {
               //TODO
               this.data.blob_data = reader.result;
@@ -177,7 +178,7 @@ export default Vue.extend({
             }
           };
 
-          reader.readAsDataURL(data);
+          reader.readAsDataURL(data1);
         });
     },
     // blobToString(b) {
