@@ -60,6 +60,7 @@ export default Vue.extend({
       start_time: "",
       isStart: false,
       imageCapture: {},
+      file: null,
     };
   },
   methods: {
@@ -114,40 +115,61 @@ export default Vue.extend({
     },
     takePhoto() {
       let data = "";
+      let data2 = "";
       this.imageCapture
         .takePhoto()
         .then((blob) => {
-          console.log(blob.text());
+          // console.log(blob.text());
           const myFile = new File([blob], "image.jpeg", {
             type: blob.type,
           });
-          console.log(myFile);
+          // console.log(myFile);
           // this.downloadFiles(blob, "test.png", "image/png");
+          //this.file = new Blob([blob], { type: "image/png" });
           data = blob;
         })
         .then(() => {
           console.log(data, "data!!!!!!!!");
           let reader = new FileReader();
-          reader.onload = function () {
-            console.log(reader.result);
+          reader.onload = async function () {
+
+            //data = this.blobToString(data);
+
             try {
-              getDetect({
+              //TODO
+              
+              data2 = await getDetect({
                 blob_data: reader.result,
-                nose_to_center: "",
-                face_mean: 0.0,
+                face_x_mean: 0.0,
+                face_y_mean: 0.0,
                 nose_mean: 0.0,
+                face_x: "",
+                face_y: "",
+                nose_to_center: "",
                 cnt: 0,
-                face: "",
               });
+              console.log(data2)
             } catch (error) {
               console.log(error);
-            }
+            };
           };
-          reader.readAsText(data);
-        });
+        
+          reader.readAsDataURL(data);
+          
+        })
     },
-    // downloadFiles(data, file_name, file_type) {
-    //   var file = new Blob([data], { type: file_type });
+    // blobToString(b) {
+    //     var u, x;
+    //     u = URL.createObjectURL(b);
+    //     x = new XMLHttpRequest();
+    //     x.open("GET", u, false); // although sync, you're not fetching over internet
+    //     x.send();
+    //     URL.revokeObjectURL(u);
+    //     return x.responseText;
+    // },
+
+    downloadFiles(data, file_name, file_type) {
+      var file = new Blob([data], { type: file_type }); 
     //   if (window.navigator.msSaveOrOpenBlob)
     //     window.navigator.msSaveOrOpenBlob(file, file_name);
     //   else {
@@ -162,7 +184,7 @@ export default Vue.extend({
     //       window.URL.revokeObjectURL(url);
     //     }, 0);
     //   }
-    // },
+    },
   },
   // mounted() {
   //   this.init();

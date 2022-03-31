@@ -48,7 +48,7 @@ async function insertReports(reports: any): Promise<any> {
 
 async function getDetect(data: any) {
   const loginApi = loginApiInstance();
-  await loginApi.post(`/detections/`, JSON.stringify(data));
+  return await loginApi.post(`/detections/`, JSON.stringify(data));
 }
 
 export {
