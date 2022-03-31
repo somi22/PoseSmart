@@ -48,7 +48,12 @@ async function insertReports(reports: any): Promise<any> {
 
 async function getDetect(data: any) {
   const loginApi = loginApiInstance();
-  return await loginApi.post(`/detections/`, JSON.stringify(data));
+  const temp = data;
+  temp.face_x = data.face_x.toString();
+  temp.face_y = data.face_y.toString();
+  temp.nose_to_center = data.nose_to_center.toString();
+  console.log(temp);
+  return await loginApi.post(`/detections/`, JSON.stringify(temp));
 }
 
 export {

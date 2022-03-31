@@ -61,6 +61,9 @@ export default Vue.extend({
       isStart: false,
       imageCapture: {},
       file: null,
+      face_x_mean: [],
+      face_y_mean: [],
+      nose_to_center: [],
       data: {
         blob_data: "",
         face_x_mean: 0.0,
@@ -146,6 +149,16 @@ export default Vue.extend({
             try {
               //TODO
               this.data.blob_data = reader.result;
+              if (this.data.cnt == 4) {
+                this.nose_to_center = this.data.nose_to_center;
+                this.face_x_mean = this.data.face_x_mean;
+                this.face_y_mean = this.dtaa.face_y_mean;
+              }
+              if (this.data.cnt > 4) {
+                this.data.face_x_mean = this.face_x_mean;
+                this.data.face_y_mean = this.face_y_mean;
+                this.data.nose_to_center = this.nose_to_center;
+              }
               this.data = await getDetect(this.data).data;
               console.log(this.data);
             } catch (error) {
