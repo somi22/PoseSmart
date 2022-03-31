@@ -61,9 +61,9 @@ export default Vue.extend({
       isStart: false,
       imageCapture: {},
       file: null,
-      face_x_mean: [],
-      face_y_mean: [],
-      nose_to_center: [],
+      face_x_mean: 0.0,
+      face_y_mean: 0.0,
+      nose_mean: 0.0,
       data: {
         blob_data: "",
         face_x_mean: 0.0,
@@ -72,6 +72,16 @@ export default Vue.extend({
         face_x: "",
         face_y: "",
         nose_to_center: "",
+        cnt: 0,
+      },
+      overFive_data: {
+        blob_data: "",
+        face_x_mean: 0.0,
+        face_y_mean: 0.0,
+        nose_mean: 0.0,
+        face_x: [],
+        face_y: [],
+        nose_to_center: [],
         cnt: 0,
       },
     };
@@ -145,22 +155,23 @@ export default Vue.extend({
           const reader = new FileReader();
           reader.onload = async function () {
             //data = this.blobToString(data);
-
             try {
               //TODO
               this.data.blob_data = reader.result;
               if (this.data.cnt == 4) {
-                this.nose_to_center = this.data.nose_to_center;
+                this.nose_mean = this.data.nose_mean;
                 this.face_x_mean = this.data.face_x_mean;
-                this.face_y_mean = this.dtaa.face_y_mean;
+                this.face_y_mean = this.data.face_y_mean;
+                this.overFive_data.face_x_mean = this.face_x_mean;
+                this.overFive_data.face_y_mean = this.face_y_mean;
+                this.overFive_data.nose_mean = this.nose_mean;
               }
               if (this.data.cnt > 4) {
-                this.data.face_x_mean = this.face_x_mean;
-                this.data.face_y_mean = this.face_y_mean;
-                this.data.nose_to_center = this.nose_to_center;
+                console.log(this.overFive_data);
+                await getDetect(this.overFive_data);
               }
-              this.data = await getDetect(this.data).data;
               console.log(this.data);
+              this.data = (await getDetect(this.data)).data;
             } catch (error) {
               console.log(error);
             }
