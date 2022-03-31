@@ -114,8 +114,8 @@ export default Vue.extend({
     },
     takePhoto() {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      let audio = new Audio(require("../assets/거북목가람.mp3"));
-      audio.play();
+      // let audio = new Audio(require("../assets/거북목가람.mp3"));
+      // audio.play();
       let data = "";
       this.imageCapture
         .takePhoto()
@@ -132,16 +132,16 @@ export default Vue.extend({
           console.log(data, "data!!!!!!!!");
           let reader = new FileReader();
           reader.onload = function () {
-            // console.log(reader.result);
+            console.log(reader.result);
             try {
-              // getDetect({
-              //   blob_data: reader.result,
-              //   nose_to_center: "",
-              //   face_mean: 0.0,
-              //   nose_mean: 0.0,
-              //   cnt: 0,
-              //   face: "",
-              // });
+              getDetect({
+                blob_data: reader.result,
+                nose_to_center: "",
+                face_mean: 0.0,
+                nose_mean: 0.0,
+                cnt: 0,
+                face: "",
+              });
             } catch (error) {
               console.log(error);
             }

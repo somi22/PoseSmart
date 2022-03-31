@@ -2,9 +2,11 @@
   <div>
     <div
       class="loginImg"
-      :style="{ backgroundImage: `url(${require('@/assets/main.jpg')})` }"
+      :style="{ backgroundImage: `url(${require('@/assets/transmain.png')})` }"
     >
-      <div class="logo">PoseSmart</div>
+      <div class="logo">
+        <img src="@/assets/logo_transparent.png" alt="" width="300" />
+      </div>
       <div class="content" :style="{ top: '55%', fontSize: '3rem' }">
         <div>AI 거북목 탐지 & 눈 깜빡임 감지</div>
         <div :style="{ marginTop: '130px' }">
