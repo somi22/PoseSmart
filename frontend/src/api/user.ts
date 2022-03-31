@@ -54,7 +54,6 @@ async function getDetect(data: any) {
   temp.nose_to_center = data.nose_to_center.toString();
   console.log(temp);
   return await loginApi.post(`/detections/`, JSON.stringify(temp));
-
 }
 
 export {
