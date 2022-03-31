@@ -152,15 +152,15 @@ export default Vue.extend({
               if (this.data.cnt == 4) {
                 this.nose_to_center = this.data.nose_to_center;
                 this.face_x_mean = this.data.face_x_mean;
-                this.face_y_mean = this.dtaa.face_y_mean;
+                this.face_y_mean = this.data.face_y_mean;
               }
               if (this.data.cnt > 4) {
                 this.data.face_x_mean = this.face_x_mean;
                 this.data.face_y_mean = this.face_y_mean;
                 this.data.nose_to_center = this.nose_to_center;
               }
-              this.data = await getDetect(this.data).data;
               console.log(this.data);
+              this.data = (await getDetect(this.data)).data;
             } catch (error) {
               console.log(error);
             }
