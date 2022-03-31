@@ -61,6 +61,16 @@ export default Vue.extend({
       isStart: false,
       imageCapture: {},
       file: null,
+      data: {
+        blob_data: "",
+        face_x_mean: 0.0,
+        face_y_mean: 0.0,
+        nose_mean: 0.0,
+        face_x: "",
+        face_y: "",
+        nose_to_center: "",
+        cnt: 0,
+      },
     };
   },
   methods: {
@@ -120,43 +130,31 @@ export default Vue.extend({
         .takePhoto()
         .then((blob) => {
           // console.log(blob.text());
-          const myFile = new File([blob], "image.jpeg", {
-            type: blob.type,
-          });
+          // const myFile = new File([blob], "image.jpeg", {
+          //   type: blob.type,
+          // });
           // console.log(myFile);
           // this.downloadFiles(blob, "test.png", "image/png");
           //this.file = new Blob([blob], { type: "image/png" });
           data = blob;
         })
         .then(() => {
-          console.log(data, "data!!!!!!!!");
-          let reader = new FileReader();
+          const reader = new FileReader();
           reader.onload = async function () {
-
             //data = this.blobToString(data);
 
             try {
               //TODO
-              
-              data2 = await getDetect({
-                blob_data: reader.result,
-                face_x_mean: 0.0,
-                face_y_mean: 0.0,
-                nose_mean: 0.0,
-                face_x: "",
-                face_y: "",
-                nose_to_center: "",
-                cnt: 0,
-              });
-              console.log(data2)
+              this.data.blob_data = reader.result;
+              this.data = await getDetect(this.data).data;
+              console.log(this.data);
             } catch (error) {
               console.log(error);
-            };
+            }
           };
-        
+
           reader.readAsDataURL(data);
-          
-        })
+        });
     },
     // blobToString(b) {
     //     var u, x;
@@ -169,21 +167,21 @@ export default Vue.extend({
     // },
 
     downloadFiles(data, file_name, file_type) {
-      var file = new Blob([data], { type: file_type }); 
-    //   if (window.navigator.msSaveOrOpenBlob)
-    //     window.navigator.msSaveOrOpenBlob(file, file_name);
-    //   else {
-    //     var a = document.createElement("a"),
-    //       url = URL.createObjectURL(file);
-    //     a.href = url;
-    //     a.download = file_name;
-    //     document.body.appendChild(a);
-    //     a.click();
-    //     setTimeout(function () {
-    //       document.body.removeChild(a);
-    //       window.URL.revokeObjectURL(url);
-    //     }, 0);
-    //   }
+      var file = new Blob([data], { type: file_type });
+      //   if (window.navigator.msSaveOrOpenBlob)
+      //     window.navigator.msSaveOrOpenBlob(file, file_name);
+      //   else {
+      //     var a = document.createElement("a"),
+      //       url = URL.createObjectURL(file);
+      //     a.href = url;
+      //     a.download = file_name;
+      //     document.body.appendChild(a);
+      //     a.click();
+      //     setTimeout(function () {
+      //       document.body.removeChild(a);
+      //       window.URL.revokeObjectURL(url);
+      //     }, 0);
+      //   }
     },
   },
   // mounted() {
