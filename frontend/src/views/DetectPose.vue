@@ -166,10 +166,13 @@ export default Vue.extend({
                 this.overFive_data.face_x_mean = this.face_x_mean;
                 this.overFive_data.face_y_mean = this.face_y_mean;
                 this.overFive_data.nose_mean = this.nose_mean;
+                this.overFive_data.cnt = this.data.cnt;
               }
               if (this.data.cnt > 4) {
-                console.log(this.overFive_data);
+                this.overFive_data.blob_data = reader.result;
+                this.overFive_data.cnt = this.overFive_data.cnt + 1;
                 await getDetect(this.overFive_data);
+                return;
               }
               console.log(this.data);
               this.data = (await getDetect(this.data)).data;
