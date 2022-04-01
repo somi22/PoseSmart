@@ -60,6 +60,30 @@ export default Vue.extend({
       start_time: "",
       isStart: false,
       imageCapture: {},
+      file: null,
+      face_x_mean: 0.0,
+      face_y_mean: 0.0,
+      nose_mean: 0.0,
+      data: {
+        blob_data: "",
+        face_x_mean: 0.0,
+        face_y_mean: 0.0,
+        nose_mean: 0.0,
+        face_x: "",
+        face_y: "",
+        nose_to_center: "",
+        cnt: 0,
+      },
+      overFive_data: {
+        blob_data: "",
+        face_x_mean: 0.0,
+        face_y_mean: 0.0,
+        nose_mean: 0.0,
+        face_x: [],
+        face_y: [],
+        nose_to_center: [],
+        cnt: 0,
+      },
     };
   },
   methods: {
@@ -113,59 +137,80 @@ export default Vue.extend({
       this.playing = true;
     },
     takePhoto() {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      // let audio = new Audio(require("../assets/거북목가람.mp3"));
-      // audio.play();
-      let data = "";
+      let data1 = "";
+      let data2 = "";
       this.imageCapture
         .takePhoto()
         .then((blob) => {
-          console.log(blob.text());
-          const myFile = new File([blob], "image.jpeg", {
-            type: blob.type,
-          });
-          console.log(myFile);
+          // console.log(blob.text());
+          // const myFile = new File([blob], "image.jpeg", {
+          //   type: blob.type,
+          // });
+          // console.log(myFile);
           // this.downloadFiles(blob, "test.png", "image/png");
-          data = blob;
+          //this.file = new Blob([blob], { type: "image/png" });
+          data1 = blob;
         })
         .then(() => {
-          console.log(data, "data!!!!!!!!");
-          let reader = new FileReader();
-          reader.onload = function () {
-            console.log(reader.result);
+          const reader = new FileReader();
+          reader.onload = async () => {
+            //data = this.blobToString(data);
+            console.log(this.data);
             try {
-              getDetect({
-                blob_data: reader.result,
-                nose_to_center: "",
-                face_mean: 0.0,
-                nose_mean: 0.0,
-                cnt: 0,
-                face: "",
-              });
+              //TODO
+              this.data.blob_data = reader.result;
+              if (this.data.cnt == 4) {
+                this.nose_mean = this.data.nose_mean;
+                this.face_x_mean = this.data.face_x_mean;
+                this.face_y_mean = this.data.face_y_mean;
+                this.overFive_data.face_x_mean = this.face_x_mean;
+                this.overFive_data.face_y_mean = this.face_y_mean;
+                this.overFive_data.nose_mean = this.nose_mean;
+                this.overFive_data.cnt = this.data.cnt;
+              }
+              if (this.data.cnt > 4) {
+                this.overFive_data.blob_data = reader.result;
+                this.overFive_data.cnt = this.overFive_data.cnt + 1;
+                await getDetect(this.overFive_data);
+                return;
+              }
+              console.log(this.data);
+              this.data = (await getDetect(this.data)).data;
             } catch (error) {
               console.log(error);
             }
           };
-          reader.readAsText(data);
+
+          reader.readAsDataURL(data1);
         });
     },
-    // downloadFiles(data, file_name, file_type) {
-    //   var file = new Blob([data], { type: file_type });
-    //   if (window.navigator.msSaveOrOpenBlob)
-    //     window.navigator.msSaveOrOpenBlob(file, file_name);
-    //   else {
-    //     var a = document.createElement("a"),
-    //       url = URL.createObjectURL(file);
-    //     a.href = url;
-    //     a.download = file_name;
-    //     document.body.appendChild(a);
-    //     a.click();
-    //     setTimeout(function () {
-    //       document.body.removeChild(a);
-    //       window.URL.revokeObjectURL(url);
-    //     }, 0);
-    //   }
+    // blobToString(b) {
+    //     var u, x;
+    //     u = URL.createObjectURL(b);
+    //     x = new XMLHttpRequest();
+    //     x.open("GET", u, false); // although sync, you're not fetching over internet
+    //     x.send();
+    //     URL.revokeObjectURL(u);
+    //     return x.responseText;
     // },
+
+    downloadFiles(data, file_name, file_type) {
+      var file = new Blob([data], { type: file_type });
+      //   if (window.navigator.msSaveOrOpenBlob)
+      //     window.navigator.msSaveOrOpenBlob(file, file_name);
+      //   else {
+      //     var a = document.createElement("a"),
+      //       url = URL.createObjectURL(file);
+      //     a.href = url;
+      //     a.download = file_name;
+      //     document.body.appendChild(a);
+      //     a.click();
+      //     setTimeout(function () {
+      //       document.body.removeChild(a);
+      //       window.URL.revokeObjectURL(url);
+      //     }, 0);
+      //   }
+    },
   },
   // mounted() {
   //   this.init();
