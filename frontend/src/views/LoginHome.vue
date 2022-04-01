@@ -2,7 +2,7 @@
   <div>
     <div
       class="loginImg"
-      :style="{ backgroundImage: `url(${require('@/assets/main2.png')})` }"
+      :style="{ backgroundImage: `url(${require('@/assets/main3.jpg')})` }"
     >
       <div class="logo">
         <img
@@ -27,7 +27,7 @@
         <v-col>
           <img
             class="rounded-xl"
-            src="@/assets/detect.png"
+            src="@/assets/detect1.png"
             alt=""
             width="368"
             @click="click('detect')"
@@ -37,7 +37,7 @@
         <v-col>
           <img
             class="rounded-xl"
-            src="@/assets/result.png"
+            src="@/assets/result1.png"
             alt=""
             width="368"
             @click="click('result')"
@@ -47,7 +47,7 @@
         <v-col>
           <img
             class="rounded-xl"
-            src="@/assets/alarm.png"
+            src="@/assets/alarm1.png"
             alt=""
             width="368"
             @click="click('alarm')"
