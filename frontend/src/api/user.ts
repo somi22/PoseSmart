@@ -72,5 +72,5 @@ export {
   getReports,
   insertReports,
   getDetect,
-  getDetectBlink
+  getDetectBlink,
 };
