@@ -54,13 +54,12 @@ async function getDetect(data: any) {
     temp.face_y = data.face_y.toString();
     temp.nose_to_center = data.nose_to_center.toString();
   }
-  console.log(temp);
   return await loginApi.post(`/detections/`, JSON.stringify(temp));
 }
 
 async function getDetectBlink(data: any) {
   const loginApi = loginApiInstance();
-  return await loginApi.post(`/detections/blink`, JSON.stringify(data));
+  return await loginApi.post(`/detections/blink/`, JSON.stringify(data));
 }
 
 export {

@@ -44,7 +44,6 @@
             ><img class="icon" src="@/assets/exit.png" alt="" @click="exit()"
           /></v-col>
         </v-row>
-        <v-button @click="takePhoto"> click </v-button>
       </div>
     </div>
     <!-- <a href="#">download</a> -->
@@ -53,7 +52,7 @@
 
 <script>
 import Vue from "vue";
-import { insertReports, getDetect, getDetectBlink } from "@/api/user";
+import { insertReports, getDetect, getDetectBlink, getTime } from "@/api/user";
 export default Vue.extend({
   data() {
     return {
@@ -103,17 +102,33 @@ export default Vue.extend({
         flag: "",
       },
       eyeTimeSet: "",
-      userStretchingTime: 0,
-      userEyeTime: 0,
-      userNeckTime: 0,
+      userSetting: {},
       eyeAlarm: true,
       xCnt: 0,
       yCnt: 0,
+      angleSound: {}, // 고개 사운드
+      distancSound: {}, // 거리 사운드
+      eyeSound: {}, // 눈깜빡임 사운드
     };
   },
-  created() {
-    // const data =
-    this.userEyeTime;
+  async created() {
+    const data = await getTime();
+    console.log(data.data);
+    this.userSetting = data.data;
+    this.userSetting.stretching_time =
+      this.userSetting.stretching_time / 60 / 60;
+    console.log(this.userSetting);
+    switch (this.userSetting.alarm_sound) {
+      case 1:
+        this.a;
+        break;
+      case 2:
+        break;
+      case 3:
+        break;
+      case 4:
+        break;
+    }
   },
   methods: {
     home() {
@@ -127,7 +142,6 @@ export default Vue.extend({
     pause() {
       if (this.time > 0) {
         clearInterval(this.timeset);
-        console.log(this.timeset);
         this.playing = !this.playing;
         this.localVideo.srcObject = null;
         clearInterval(this.eyeTimeSet);
@@ -155,22 +169,9 @@ export default Vue.extend({
       this.imageCapture.takePhoto().then((blob) => {
         const reader = new FileReader();
         reader.onload = async () => {
-          // console.log(reader.result);
-          // console.log(this.data);
           try {
             //TODO
             this.data.blob_data = reader.result;
-            // // this.resBlinkData.blob_data = reader.result;
-            // // console.log(
-            // //   "req : ",
-            // //   "cnt : ",
-            // //   this.resBlinkData.count,
-            // //   "time : ",
-            // //   this.resBlinkData.time,
-            // //   this.resBlinkData.total
-            // // );
-            // // this.resBlinkData = (await getDetectBlink(this.resBlinkData)).data;
-            // console.log("res : ", this.resBlinkData);
             if (this.data.cnt == 4) {
               this.overFive_data.cnt = this.data.cnt;
               this.nose_mean = this.data.nose_mean;
@@ -185,22 +186,28 @@ export default Vue.extend({
               this.overFive_data.blob_data = reader.result;
               this.overFive_data.cnt = this.overFive_data.cnt + 1;
               const data = (await getDetect(this.overFive_data)).data;
-              console.log(data);
+              console.log("Over 4 res", data);
+              if (data.detection_flag === "detected") {
+                if (!data.x_result) {
+                  this.xCnt++;
+                  if (this.xCnt % 5 === 0) {
+                    // 고개 기울어졌다 알람
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    let audio = new Audio(require("../assets/거북목가람.mp3"));
+                    audio.play();
+                  }
+                } else if (!data.y_result) {
+                  this.yCnt++;
+                  if (this.yCnt % 5 === 0) {
+                    console.log("거리 가까움");
+                    // 모니터랑 멀어져라 알람
+                  }
+                }
+              }
               return;
             }
             this.data = (await getDetect(this.data)).data;
-            console.log(this.data);
-            if (this.data.x_result) {
-              this.xCnt++;
-              if (this.xCnt % 3 === 0) {
-                // 고개 기울어졌다 알람
-              }
-            } else if (this.data.y_result) {
-              this.yCnt++;
-              if (this.yCnt % 3 === 0) {
-                // 모니터랑 멀어져라 알람
-              }
-            }
+            console.log("less Cnt 4 response", this.data);
           } catch (error) {
             console.log(error);
           }
@@ -209,31 +216,31 @@ export default Vue.extend({
       });
     },
     play() {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          //TODO
-          this.resBlinkData.blob_data = reader.result;
-          console.log(
-            "req : ",
-            "cnt : ",
-            this.resBlinkData.count,
-            "time : ",
-            this.resBlinkData.time,
-            "total : ",
-            this.resBlinkData.total
-          );
-          this.resBlinkData = (await getDetectBlink(this.resBlinkData)).data;
-          if (this.resBlinkData.res === true) {
-            // 알림음 울리기
-            this.eyeAlarm = true;
-            clearInterval(this.eyeTimeSet);
-          } // 20초 안에 true나오면 그만 보냈다가 다시 20초 되면 보내기
-          console.log("res : ", this.resBlinkData);
-        } catch (error) {
-          console.log(error);
-        }
-      };
+      // const reader = new FileReader();
+      // reader.onload = async () => {
+      //   try {
+      //     //TODO
+      //     this.resBlinkData.blob_data = reader.result;
+      //     console.log(
+      //       "req : ",
+      //       "cnt : ",
+      //       this.resBlinkData.count,
+      //       "time : ",
+      //       this.resBlinkData.time,
+      //       "total : ",
+      //       this.resBlinkData.total
+      //     );
+      //     this.resBlinkData = (await getDetectBlink(this.resBlinkData)).data;
+      //     if (this.resBlinkData.res === true) {
+      //       // 알림음 울리기
+      //       this.eyeAlarm = true;
+      //       clearInterval(this.eyeTimeSet);
+      //     } // 20초 안에 true나오면 그만 보냈다가 다시 20초 되면 보내기
+      //     console.log("res : ", this.resBlinkData);
+      //   } catch (error) {
+      //     console.log(error);
+      //   }
+      // };
 
       // 여기서 모델 탐지하는 통신을 해야함
       if (!this.isStart) {
@@ -247,25 +254,27 @@ export default Vue.extend({
         let second = parseInt(this.time % 60);
         this.timeString = hour + " : " + min + " : " + second;
 
-        if (second % 20 === 0) {
-          if (!this.eyeAlarm) {
-            // 알람 울리기
-          }
-          this.eyeAlarm = false;
-          this.eyeTimeSet = setInterval(() => {
-            this.imageCapture.takePhoto().then((blob) => {
-              reader.readAsDataURL(blob);
-            });
-          }, 500); // 0 -> 10 +10 / 20
-        }
+        // if (second % 20 === 0) {
+        //   if (!this.eyeAlarm) {
+        //     // 알람 울리기
+        //   }
+        //   this.eyeAlarm = false;
+        //   this.eyeTimeSet = setInterval(() => {
+        //     this.imageCapture.takePhoto().then((blob) => {
+        //       reader.readAsDataURL(blob);
+        //     });
+        //   }, 500); // 0 -> 10 +10 / 20
+        // }
 
         if (min === 0 && second === 1) {
           // 스트레칭 알림음 주기
         }
       }, 1000);
+
       this.neckTime = setInterval(() => {
         this.takePhoto();
-      }, 500);
+      }, 1000);
+
       this.localVideo = document.querySelector("video");
       navigator.mediaDevices
         .getUserMedia({ video: true })
