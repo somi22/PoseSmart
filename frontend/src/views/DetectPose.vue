@@ -44,7 +44,7 @@
 
 <script>
 import Vue from "vue";
-import { insertReports, getDetect } from "@/api/user";
+import { insertReports, getDetect, getDetectBlink } from "@/api/user";
 export default Vue.extend({
   data() {
     return {
@@ -74,6 +74,12 @@ export default Vue.extend({
         nose_to_center: "",
         cnt: 0,
       },
+      resBlinkData :{
+        blob_data : "",
+        count : 0,  // 변수 빼기
+        total : 0,
+        time : 0,
+      },
       overFive_data: {
         blob_data: "",
         face_x_mean: 0.0,
@@ -84,6 +90,7 @@ export default Vue.extend({
         nose_to_center: "",
         cnt: 0,
       },
+      eyeTimeSet : ""
     };
   },
   methods: {
@@ -92,6 +99,7 @@ export default Vue.extend({
         clearInterval(this.timeset);
         this.playing = !this.playing;
         this.localVideo.srcObject = null;
+        clearInterval(this.eyeTimeSet);
       }
     },
     async exit() {
@@ -134,6 +142,26 @@ export default Vue.extend({
           this.imageCapture = new ImageCapture(track);
         })
         .catch((e) => console.log(e));
+        const reader = new FileReader();
+         reader.onload = async () => {
+            try {
+              //TODO
+              this.data.blob_data = reader.result;
+              this.resBlinkData.blob_data = reader.result;
+              // console.log("req : " , "cnt : ",  this.resBlinkData.count, "time : ", this.resBlinkData.time, this.resBlinkData.total);
+              this.resBlinkData = (await getDetectBlink(this.resBlinkData)).data;
+              console.log("res : ",  this.resBlinkData);
+            } catch (error) {
+              console.log(error);
+            }
+          };
+
+      this.eyeTimeSet = setInterval(()=>{
+        this.imageCapture.takePhoto().then((blob)=>{
+          reader.readAsDataURL(blob);
+        })
+      },500) //시간
+      
       this.playing = true;
     },
     takePhoto() {
@@ -159,6 +187,10 @@ export default Vue.extend({
             try {
               //TODO
               this.data.blob_data = reader.result;
+              this.resBlinkData.blob_data = reader.result;
+              console.log("req : " , "cnt : ",  this.resBlinkData.count, "time : ", this.resBlinkData.time, this.resBlinkData.total);
+              this.resBlinkData = (await getDetectBlink(this.resBlinkData)).data;
+              console.log("res : ",  this.resBlinkData);
               if (this.data.cnt == 4) {
                 this.overFive_data.cnt = this.data.cnt;
                 this.nose_mean = this.data.nose_mean;

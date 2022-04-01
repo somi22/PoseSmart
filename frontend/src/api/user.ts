@@ -58,6 +58,11 @@ async function getDetect(data: any) {
   return await loginApi.post(`/detections/`, JSON.stringify(temp));
 }
 
+async function getDetectBlink(data: any) {
+  const loginApi = loginApiInstance();
+  return await loginApi.post(`/detections/blink`, JSON.stringify(data));
+}
+
 export {
   registerUser,
   deleteUser,
@@ -67,4 +72,5 @@ export {
   getReports,
   insertReports,
   getDetect,
+  getDetectBlink
 };
