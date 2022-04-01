@@ -53,13 +53,13 @@
 
 <script>
 import Vue from "vue";
-import { insertReports, getDetect } from "@/api/user";
+import { insertReports, getDetect, getDetectBlink } from "@/api/user";
 export default Vue.extend({
   data() {
     return {
       localStream: {},
       localVideo: {},
-      time: 0,
+      time: -1,
       timeString: "",
       timeset: {},
       playing: false,
@@ -82,17 +82,31 @@ export default Vue.extend({
         face_y: "",
         nose_to_center: "",
         cnt: 0,
+        flag: "",
+      },
+      resBlinkData: {
+        blob_data: "",
+        count: 0, // 변수 빼기
+        total: 0,
+        time: 0,
+        flag: "",
       },
       overFive_data: {
         blob_data: "",
         face_x_mean: 0.0,
         face_y_mean: 0.0,
         nose_mean: 0.0,
-        face_x: [],
-        face_y: [],
-        nose_to_center: [],
+        face_x: "",
+        face_y: "",
+        nose_to_center: "",
         cnt: 0,
+        flag: "",
       },
+      eyeTimeSet: "",
+      userStretchingTime: 0,
+      eyeAlarm: true,
+      xCnt: 0,
+      yCnt: 0,
     };
   },
   methods: {
@@ -107,8 +121,11 @@ export default Vue.extend({
     pause() {
       if (this.time > 0) {
         clearInterval(this.timeset);
+        console.log(this.timeset);
         this.playing = !this.playing;
         this.localVideo.srcObject = null;
+        clearInterval(this.eyeTimeSet);
+        clearInterval(this.neckTime);
       }
     },
     async exit() {
@@ -128,7 +145,90 @@ export default Vue.extend({
       }
       this.$router.push({ name: "LoginHome" });
     },
+    takePhoto() {
+      this.imageCapture.takePhoto().then((blob) => {
+        const reader = new FileReader();
+        reader.onload = async () => {
+          // console.log(reader.result);
+          // console.log(this.data);
+          try {
+            //TODO
+            this.data.blob_data = reader.result;
+            // // this.resBlinkData.blob_data = reader.result;
+            // // console.log(
+            // //   "req : ",
+            // //   "cnt : ",
+            // //   this.resBlinkData.count,
+            // //   "time : ",
+            // //   this.resBlinkData.time,
+            // //   this.resBlinkData.total
+            // // );
+            // // this.resBlinkData = (await getDetectBlink(this.resBlinkData)).data;
+            // console.log("res : ", this.resBlinkData);
+            if (this.data.cnt == 4) {
+              this.overFive_data.cnt = this.data.cnt;
+              this.nose_mean = this.data.nose_mean;
+              this.face_x_mean = this.data.face_x_mean;
+              this.face_y_mean = this.data.face_y_mean;
+              this.overFive_data.face_x_mean = this.face_x_mean;
+              this.overFive_data.face_y_mean = this.face_y_mean;
+              this.overFive_data.nose_mean = this.nose_mean;
+              this.overFive_data.cnt = this.data.cnt;
+            }
+            if (this.data.cnt >= 4) {
+              this.overFive_data.blob_data = reader.result;
+              this.overFive_data.cnt = this.overFive_data.cnt + 1;
+              const data = (await getDetect(this.overFive_data)).data;
+              console.log(data);
+              return;
+            }
+            this.data = (await getDetect(this.data)).data;
+            console.log(this.data);
+            if (this.data.x_result) {
+              this.xCnt++;
+              if (this.xCnt % 3 === 0) {
+                // 고개 기울어졌다 알람
+              }
+            } else if (this.data.y_result) {
+              this.yCnt++;
+              if (this.yCnt % 3 === 0) {
+                // 모니터랑 멀어져라 알람
+              }
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        };
+        reader.readAsDataURL(blob);
+      });
+    },
     play() {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          //TODO
+          this.resBlinkData.blob_data = reader.result;
+          console.log(
+            "req : ",
+            "cnt : ",
+            this.resBlinkData.count,
+            "time : ",
+            this.resBlinkData.time,
+            "total : ",
+            this.resBlinkData.total
+          );
+          this.resBlinkData = (await getDetectBlink(this.resBlinkData)).data;
+          if (this.resBlinkData.res === true) {
+            // 알림음 울리기
+            this.eyeAlarm = true;
+            clearInterval(this.eyeTimeSet);
+          } // 20초 안에 true나오면 그만 보냈다가 다시 20초 되면 보내기
+          console.log("res : ", this.resBlinkData);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
       // 여기서 모델 탐지하는 통신을 해야함
       if (!this.isStart) {
         this.start_time = new Date();
@@ -140,7 +240,26 @@ export default Vue.extend({
         let min = parseInt((this.time % 3600) / 60);
         let second = parseInt(this.time % 60);
         this.timeString = hour + " : " + min + " : " + second;
+
+        if (second % 20 === 0) {
+          if (!this.eyeAlarm) {
+            // 알람 울리기
+          }
+          this.eyeAlarm = false;
+          this.eyeTimeSet = setInterval(() => {
+            this.imageCapture.takePhoto().then((blob) => {
+              reader.readAsDataURL(blob);
+            });
+          }, 500); // 0 -> 10 +10 / 20
+        }
+
+        if (min === 0 && second === 1) {
+          // 스트레칭 알림음 주기
+        }
       }, 1000);
+      this.neckTime = setInterval(() => {
+        this.takePhoto();
+      }, 500);
       this.localVideo = document.querySelector("video");
       navigator.mediaDevices
         .getUserMedia({ video: true })
@@ -151,54 +270,8 @@ export default Vue.extend({
           this.imageCapture = new ImageCapture(track);
         })
         .catch((e) => console.log(e));
+
       this.playing = true;
-    },
-    takePhoto() {
-      let data1 = "";
-      let data2 = "";
-      this.imageCapture
-        .takePhoto()
-        .then((blob) => {
-          // console.log(blob.text());
-          // const myFile = new File([blob], "image.jpeg", {
-          //   type: blob.type,
-          // });
-          // console.log(myFile);
-          // this.downloadFiles(blob, "test.png", "image/png");
-          //this.file = new Blob([blob], { type: "image/png" });
-          data1 = blob;
-        })
-        .then(() => {
-          const reader = new FileReader();
-          reader.onload = async () => {
-            //data = this.blobToString(data);
-            console.log(this.data);
-            try {
-              //TODO
-              this.data.blob_data = reader.result;
-              if (this.data.cnt == 4) {
-                this.nose_mean = this.data.nose_mean;
-                this.face_x_mean = this.data.face_x_mean;
-                this.face_y_mean = this.data.face_y_mean;
-                this.overFive_data.face_x_mean = this.face_x_mean;
-                this.overFive_data.face_y_mean = this.face_y_mean;
-                this.overFive_data.nose_mean = this.nose_mean;
-                this.overFive_data.cnt = this.data.cnt;
-              }
-              if (this.data.cnt > 4) {
-                this.overFive_data.blob_data = reader.result;
-                this.overFive_data.cnt = this.overFive_data.cnt + 1;
-                await getDetect(this.overFive_data);
-                return;
-              }
-              console.log(this.data);
-              this.data = (await getDetect(this.data)).data;
-            } catch (error) {
-              console.log(error);
-            }
-          };
-          reader.readAsDataURL(data1);
-        });
     },
   },
 });

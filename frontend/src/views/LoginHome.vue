@@ -2,7 +2,7 @@
   <div>
     <div
       class="loginImg"
-      :style="{ backgroundImage: `url(${require('@/assets/transmain.png')})` }"
+      :style="{ backgroundImage: `url(${require('@/assets/main2.png')})` }"
     >
       <div class="logo">
         <img
@@ -13,9 +13,9 @@
         />
       </div>
       <v-btn class="logout" @click="logout">LOGOUT</v-btn>
-      <div class="content" :style="{ top: '55%', fontSize: '3rem' }">
+      <div class="content" :style="{ top: '63%', fontSize: '3rem' }">
         <div>AI 거북목 탐지 & 눈 깜빡임 감지</div>
-        <div :style="{ marginTop: '130px' }">
+        <div :style="{ marginTop: '80px' }">
           캠을 이용하여 거북목과 눈 깜빡임 감지시 알림을 드립니다.
         </div>
       </div>

@@ -49,13 +49,18 @@ async function insertReports(reports: any): Promise<any> {
 async function getDetect(data: any) {
   const loginApi = loginApiInstance();
   const temp = data;
-  if (temp.cnt < 4) {
+  if (temp.cnt <= 4) {
     temp.face_x = data.face_x.toString();
     temp.face_y = data.face_y.toString();
     temp.nose_to_center = data.nose_to_center.toString();
   }
   console.log(temp);
   return await loginApi.post(`/detections/`, JSON.stringify(temp));
+}
+
+async function getDetectBlink(data: any) {
+  const loginApi = loginApiInstance();
+  return await loginApi.post(`/detections/blink`, JSON.stringify(data));
 }
 
 export {
@@ -67,4 +72,5 @@ export {
   getReports,
   insertReports,
   getDetect,
+  getDetectBlink
 };
