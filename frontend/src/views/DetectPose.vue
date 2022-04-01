@@ -104,10 +104,16 @@ export default Vue.extend({
       },
       eyeTimeSet: "",
       userStretchingTime: 0,
+      userEyeTime: 0,
+      userNeckTime: 0,
       eyeAlarm: true,
       xCnt: 0,
       yCnt: 0,
     };
+  },
+  created() {
+    // const data =
+    this.userEyeTime;
   },
   methods: {
     home() {
