@@ -58,7 +58,7 @@ export default Vue.extend({
     return {
       localStream: {},
       localVideo: {},
-      time: -1,
+      time: 0,
       timeString: "",
       timeset: {},
       playing: false,
@@ -107,26 +107,57 @@ export default Vue.extend({
       xCnt: 0,
       yCnt: 0,
       angleSound: {}, // 고개 사운드
-      distancSound: {}, // 거리 사운드
+      distanceSound: {}, // 거리 사운드
       eyeSound: {}, // 눈깜빡임 사운드
+      notDetection: 0,
     };
   },
   async created() {
     const data = await getTime();
     console.log(data.data);
     this.userSetting = data.data;
-    this.userSetting.stretching_time =
-      this.userSetting.stretching_time / 60 / 60;
+
     console.log(this.userSetting);
     switch (this.userSetting.alarm_sound) {
       case 1:
-        this.a;
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // this.notDetectionSound = new Audio(require("../assets/1감지.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.angleSound = new Audio(require("../assets/1목옆.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.distanceSound = new Audio(require("../assets/1목앞.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.eyeSound = new Audio(require("../assets/1눈.mp3"));
         break;
       case 2:
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // this.notDetectionSound = new Audio(require("../assets/2감지.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.angleSound = new Audio(require("../assets/2목옆.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.distanceSound = new Audio(require("../assets/2목앞.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.eyeSound = new Audio(require("../assets/2눈.mp3"));
         break;
       case 3:
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // this.notDetectionSound = new Audio(require("../assets/3감지.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.angleSound = new Audio(require("../assets/3목옆.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.distanceSound = new Audio(require("../assets/3목앞.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.eyeSound = new Audio(require("../assets/3눈.mp3"));
         break;
       case 4:
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // this.notDetectionSound = new Audio(require("../assets/4감지.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.angleSound = new Audio(require("../assets/4목옆.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.distanceSound = new Audio(require("../assets/4목앞.mp3"));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        this.eyeSound = new Audio(require("../assets/4눈.mp3"));
         break;
     }
   },
@@ -187,21 +218,35 @@ export default Vue.extend({
               this.overFive_data.cnt = this.overFive_data.cnt + 1;
               const data = (await getDetect(this.overFive_data)).data;
               console.log("Over 4 res", data);
+              if (data.detection_flag === "false") {
+                if (++this.notDetection % 3 === 0) {
+                  this.notDetectionSound.play();
+                }
+              }
               if (data.detection_flag === "detected") {
                 if (!data.x_result) {
-                  this.xCnt++;
-                  if (this.xCnt % 5 === 0) {
-                    // 고개 기울어졌다 알람
-                    // eslint-disable-next-line @typescript-eslint/no-var-requires
-                    let audio = new Audio(require("../assets/거북목가람.mp3"));
-                    audio.play();
+                  this.xCnt++; //  고개 기울어진 횟수
+                }
+                if (!data.y_result) {
+                  this.yCnt++; // 모니터랑 가까워진 횟수
+                }
+                if (this.time % this.userSetting.neck_time === 0) {
+                  if (
+                    this.yCnt >= this.userSetting.neck_time / 2 &&
+                    this.xCnt >= this.userSetting.neck_time / 2
+                  ) {
+                    this.distanceSound.play();
+                    this.distanceSound.onended = () => {
+                      this.angleSound.play();
+                    };
+                  } else if (this.yCnt >= this.userSetting.neck_time / 2) {
+                    this.distanceSound.play();
+                  } else if (this.xCnt >= this.userSetting.neck_time / 2) {
+                    this.angleSound.play();
                   }
-                } else if (!data.y_result) {
-                  this.yCnt++;
-                  if (this.yCnt % 5 === 0) {
-                    console.log("거리 가까움");
-                    // 모니터랑 멀어져라 알람
-                  }
+                  this.yCnt = 0;
+                  this.xCnt = 0;
+                  this.neck_cnt++;
                 }
               }
               return;
@@ -216,31 +261,22 @@ export default Vue.extend({
       });
     },
     play() {
-      // const reader = new FileReader();
-      // reader.onload = async () => {
-      //   try {
-      //     //TODO
-      //     this.resBlinkData.blob_data = reader.result;
-      //     console.log(
-      //       "req : ",
-      //       "cnt : ",
-      //       this.resBlinkData.count,
-      //       "time : ",
-      //       this.resBlinkData.time,
-      //       "total : ",
-      //       this.resBlinkData.total
-      //     );
-      //     this.resBlinkData = (await getDetectBlink(this.resBlinkData)).data;
-      //     if (this.resBlinkData.res === true) {
-      //       // 알림음 울리기
-      //       this.eyeAlarm = true;
-      //       clearInterval(this.eyeTimeSet);
-      //     } // 20초 안에 true나오면 그만 보냈다가 다시 20초 되면 보내기
-      //     console.log("res : ", this.resBlinkData);
-      //   } catch (error) {
-      //     console.log(error);
-      //   }
-      // };
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          //TODO
+          this.resBlinkData.blob_data = reader.result;
+          this.resBlinkData = (await getDetectBlink(this.resBlinkData)).data;
+          if (this.resBlinkData.res === true) {
+            // 알림음 울리기
+            this.eyeAlarm = true;
+            clearInterval(this.eyeTimeSet);
+          } // 20초 안에 true나오면 그만 보냈다가 다시 20초 되면 보내기
+          console.log("res : ", this.resBlinkData);
+        } catch (error) {
+          console.log(error);
+        }
+      };
 
       // 여기서 모델 탐지하는 통신을 해야함
       if (!this.isStart) {
@@ -253,21 +289,26 @@ export default Vue.extend({
         let min = parseInt((this.time % 3600) / 60);
         let second = parseInt(this.time % 60);
         this.timeString = hour + " : " + min + " : " + second;
+        if (second % this.userSetting.blink_time === 0) {
+          if (!this.eyeAlarm) {
+            // 알람 울리기
+            this.eyeSound.play();
+          }
+          this.eyeAlarm = false;
+          this.eyeTimeSet = setInterval(() => {
+            this.imageCapture.takePhoto().then((blob) => {
+              reader.readAsDataURL(blob);
+            });
+          }, 500); // 0 -> 10 +10 / 20
+        }
 
-        // if (second % 20 === 0) {
-        //   if (!this.eyeAlarm) {
-        //     // 알람 울리기
-        //   }
-        //   this.eyeAlarm = false;
-        //   this.eyeTimeSet = setInterval(() => {
-        //     this.imageCapture.takePhoto().then((blob) => {
-        //       reader.readAsDataURL(blob);
-        //     });
-        //   }, 500); // 0 -> 10 +10 / 20
-        // }
-
-        if (min === 0 && second === 1) {
+        if (this.time % this.userSetting.stretching_time === 0) {
           // 스트레칭 알림음 주기
+          window.open(
+            "https://youtu.be/fmGibtjyy5o",
+            "",
+            "width=800, height=600"
+          );
         }
       }, 1000);
 
