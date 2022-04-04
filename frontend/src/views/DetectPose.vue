@@ -25,21 +25,27 @@
         <v-row>
           <v-col
             ><img
-              v-if="!playing"
+              v-if="mode === 'play'"
               class="icon"
               src="@/assets/play.png"
               alt=""
               @click="play()"
             />
             <img
-              v-if="playing"
+              v-if="mode === 'pause'"
               @click="pause()"
               class="icon"
               src="@/assets/pause.png"
               alt=""
             />
+            <img
+              v-if="mode === 'ready'"
+              @click="ready()"
+              class="icon"
+              src="@/assets/video.png"
+              alt=""
+            />
           </v-col>
-          <v-col></v-col>
           <v-col
             ><img class="icon" src="@/assets/exit.png" alt="" @click="exit()"
           /></v-col>
@@ -61,7 +67,7 @@ export default Vue.extend({
       time: 0,
       timeString: "",
       timeset: {},
-      playing: false,
+      mode: "ready",
       blink_cnt: 0,
       neck_cnt: 0,
       stretching_cnt: 0,
@@ -110,6 +116,7 @@ export default Vue.extend({
       distanceSound: {}, // 거리 사운드
       eyeSound: {}, // 눈깜빡임 사운드
       notDetection: 0,
+      isDetect: false,
     };
   },
   async created() {
@@ -162,6 +169,51 @@ export default Vue.extend({
     }
   },
   methods: {
+    ready() {
+      // 알림음 정자세를 유지해주세요(4초에서 ~ 10초 정도)
+      this.localVideo = document.querySelector("video");
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((mediaStream) => {
+          this.localStream = mediaStream;
+          this.localVideo.srcObject = mediaStream;
+          const track = mediaStream.getVideoTracks()[0];
+          this.imageCapture = new ImageCapture(track);
+        })
+        .catch((e) => console.log(e));
+
+      let timeSet = setInterval(() => {
+        this.imageCapture.takePhoto().then((blob) => {
+          const reader = new FileReader();
+          reader.onload = async () => {
+            try {
+              //TODO
+              this.data.blob_data = reader.result;
+              if (this.data.cnt == 4) {
+                this.overFive_data.cnt = this.data.cnt;
+                this.nose_mean = this.data.nose_mean;
+                this.face_x_mean = this.data.face_x_mean;
+                this.face_y_mean = this.data.face_y_mean;
+                this.overFive_data.face_x_mean = this.face_x_mean;
+                this.overFive_data.face_y_mean = this.face_y_mean;
+                this.overFive_data.nose_mean = this.nose_mean;
+                this.overFive_data.cnt = this.data.cnt;
+                this.mode = "play";
+                console.log("초기세팅끝", this.mode);
+                this.localVideo.srcObject = null;
+                clearInterval(timeSet);
+                return;
+              }
+              this.data = (await getDetect(this.data)).data;
+              console.log("less Cnt 4 response", this.data.cnt);
+            } catch (error) {
+              console.log(error);
+            }
+          };
+          reader.readAsDataURL(blob);
+        });
+      }, 1000);
+    },
     home() {
       this.$router.push({ name: "LoginHome" });
     },
@@ -173,10 +225,10 @@ export default Vue.extend({
     pause() {
       if (this.time > 0) {
         clearInterval(this.timeset);
-        this.playing = !this.playing;
-        this.localVideo.srcObject = null;
         clearInterval(this.eyeTimeSet);
         clearInterval(this.neckTime);
+        this.mode = "play";
+        this.localVideo.srcObject = null;
       }
     },
     async exit() {
@@ -203,64 +255,56 @@ export default Vue.extend({
           try {
             //TODO
             this.data.blob_data = reader.result;
-            if (this.data.cnt == 4) {
-              this.overFive_data.cnt = this.data.cnt;
-              this.nose_mean = this.data.nose_mean;
-              this.face_x_mean = this.data.face_x_mean;
-              this.face_y_mean = this.data.face_y_mean;
-              this.overFive_data.face_x_mean = this.face_x_mean;
-              this.overFive_data.face_y_mean = this.face_y_mean;
-              this.overFive_data.nose_mean = this.nose_mean;
-              this.overFive_data.cnt = this.data.cnt;
-            }
-            if (this.data.cnt >= 4) {
-              this.overFive_data.blob_data = reader.result;
-              this.overFive_data.cnt = this.overFive_data.cnt + 1;
-              const data = (await getDetect(this.overFive_data)).data;
-              console.log("Over 4 res", data);
-              if (data.detection_flag === "false") {
-                if (++this.notDetection % 3 === 0) {
-                  this.notDetectionSound.play();
-                }
+            this.overFive_data.blob_data = reader.result;
+            this.overFive_data.cnt = this.overFive_data.cnt + 1;
+            const data = (await getDetect(this.overFive_data)).data;
+            console.log("Over 4 res", data);
+            if (data.detection_flag === "false") {
+              if (++this.notDetection % 3 === 0) {
+                // this.notDetectionSound.play();
+                console.log(1);
               }
-              if (data.detection_flag === "detected") {
-                if (!data.x_result) {
-                  this.xCnt++; //  고개 기울어진 횟수
-                }
-                if (!data.y_result) {
-                  this.yCnt++; // 모니터랑 가까워진 횟수
-                }
-                if (this.time % this.userSetting.neck_time === 0) {
-                  if (
-                    this.yCnt >= this.userSetting.neck_time / 2 &&
-                    this.xCnt >= this.userSetting.neck_time / 2
-                  ) {
-                    this.distanceSound.play();
-                    this.distanceSound.onended = () => {
-                      this.angleSound.play();
-                    };
-                  } else if (this.yCnt >= this.userSetting.neck_time / 2) {
-                    this.distanceSound.play();
-                  } else if (this.xCnt >= this.userSetting.neck_time / 2) {
+            }
+            if (data.detection_flag === "detected") {
+              if (!data.x_result) {
+                this.xCnt++; //  고개 기울어진 횟수
+              }
+              if (!data.y_result) {
+                this.yCnt++; // 모니터랑 가까워진 횟수
+              }
+              if (this.time % this.userSetting.neck_time === 0) {
+                if (
+                  this.yCnt >= this.userSetting.neck_time / 2 &&
+                  this.xCnt >= this.userSetting.neck_time / 2
+                ) {
+                  this.distanceSound.play();
+                  this.distanceSound.onended = () => {
                     this.angleSound.play();
-                  }
-                  this.yCnt = 0;
-                  this.xCnt = 0;
-                  this.neck_cnt++;
+                  };
+                } else if (this.yCnt >= this.userSetting.neck_time / 2) {
+                  this.distanceSound.play();
+                } else if (this.xCnt >= this.userSetting.neck_time / 2) {
+                  this.angleSound.play();
                 }
+                this.yCnt = 0;
+                this.xCnt = 0;
+                this.neck_cnt++;
               }
-              return;
             }
-            this.data = (await getDetect(this.data)).data;
-            console.log("less Cnt 4 response", this.data);
           } catch (error) {
-            console.log(error);
+            console.log(error, "1");
           }
         };
         reader.readAsDataURL(blob);
       });
     },
     play() {
+      // if (!this.isDetect) {
+      //   // eslint-disable-next-line @typescript-eslint/no-var-requires
+      //   let sound4 = new Audio(require("../assets/4눈.mp3")); // 4초 감지 사운드로 변경해야함
+      //   sound4.play();
+      //   this.isDetect = !this.isDetect;
+      // }
       const reader = new FileReader();
       reader.onload = async () => {
         try {
@@ -292,6 +336,7 @@ export default Vue.extend({
         if (second % this.userSetting.blink_time === 0) {
           if (!this.eyeAlarm) {
             // 알람 울리기
+            this.blink_cnt++;
             this.eyeSound.play();
           }
           this.eyeAlarm = false;
@@ -304,6 +349,7 @@ export default Vue.extend({
 
         if (this.time % this.userSetting.stretching_time === 0) {
           // 스트레칭 알림음 주기
+          this.stretching_cnt++;
           window.open(
             "https://youtu.be/fmGibtjyy5o",
             "",
@@ -327,7 +373,7 @@ export default Vue.extend({
         })
         .catch((e) => console.log(e));
 
-      this.playing = true;
+      this.mode = "pause";
     },
   },
 });
