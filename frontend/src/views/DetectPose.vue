@@ -127,7 +127,7 @@ export default Vue.extend({
     switch (this.userSetting.alarm_sound) {
       case 1:
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        // this.notDetectionSound = new Audio(require("../assets/1감지.mp3"));
+        this.notDetectionSound = new Audio(require("../assets/1감지.mp3"));
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         this.angleSound = new Audio(require("../assets/1목옆.mp3"));
         // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -137,7 +137,7 @@ export default Vue.extend({
         break;
       case 2:
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        // this.notDetectionSound = new Audio(require("../assets/2감지.mp3"));
+        this.notDetectionSound = new Audio(require("../assets/2감지.mp3"));
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         this.angleSound = new Audio(require("../assets/2목옆.mp3"));
         // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -147,7 +147,7 @@ export default Vue.extend({
         break;
       case 3:
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        // this.notDetectionSound = new Audio(require("../assets/3감지.mp3"));
+        this.notDetectionSound = new Audio(require("../assets/3감지.mp3"));
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         this.angleSound = new Audio(require("../assets/3목옆.mp3"));
         // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -157,7 +157,7 @@ export default Vue.extend({
         break;
       case 4:
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        // this.notDetectionSound = new Audio(require("../assets/4감지.mp3"));
+        this.notDetectionSound = new Audio(require("../assets/4감지.mp3"));
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         this.angleSound = new Audio(require("../assets/4목옆.mp3"));
         // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -169,7 +169,11 @@ export default Vue.extend({
   },
   methods: {
     ready() {
-      // 알림음 정자세를 유지해주세요(4초에서 ~ 10초 정도)
+      // 알림음 정자세를 유지해주세요(4초에서 ~ 10초 정도) 감지오류
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      let detectSound = new Audio(require("../assets/감지.mp3")); // 4초 감지 사운드로 변경해야함
+      detectSound.play();
+      this.isDetect = !this.isDetect;
       this.localVideo = document.querySelector("video");
       navigator.mediaDevices
         .getUserMedia({ video: true })
@@ -260,8 +264,7 @@ export default Vue.extend({
             console.log("Over 4 res", data);
             if (data.detection_flag === "false") {
               if (++this.notDetection % 3 === 0) {
-                // this.notDetectionSound.play();
-                console.log(1);
+                this.notDetectionSound.play();
               }
             }
             if (data.detection_flag === "detected") {
