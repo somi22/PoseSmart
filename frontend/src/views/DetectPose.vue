@@ -123,7 +123,6 @@ export default Vue.extend({
     const data = await getTime();
     console.log(data.data);
     this.userSetting = data.data;
-
     console.log(this.userSetting);
     switch (this.userSetting.alarm_sound) {
       case 1:
@@ -299,12 +298,6 @@ export default Vue.extend({
       });
     },
     play() {
-      // if (!this.isDetect) {
-      //   // eslint-disable-next-line @typescript-eslint/no-var-requires
-      //   let sound4 = new Audio(require("../assets/4눈.mp3")); // 4초 감지 사운드로 변경해야함
-      //   sound4.play();
-      //   this.isDetect = !this.isDetect;
-      // }
       const reader = new FileReader();
       reader.onload = async () => {
         try {
