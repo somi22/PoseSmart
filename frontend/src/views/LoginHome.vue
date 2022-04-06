@@ -89,7 +89,7 @@
               <v-col cols="6">
                 <v-select
                   v-model="select[1]"
-                  :items="items"
+                  :items="eyeitems"
                   item-text="state"
                   item-value="val"
                   label="Select"
@@ -214,6 +214,12 @@ export default Vue.extend({
         { state: "20초", val: 20 },
         { state: "15초", val: 15 },
         { state: "10초", val: 10 },
+      ],
+      eyeitems: [
+        { state: "20초", val: 20 },
+        { state: "6초", val: 6 },
+        { state: "5초", val: 5 },
+        { state: "4초", val: 4 },
       ],
       selectStretch: {
         state: "3시간",
